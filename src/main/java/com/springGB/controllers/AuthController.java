@@ -2,6 +2,7 @@ package com.springGB.controllers;
 
 import com.springGB.dto.JwtRequest;
 import com.springGB.dto.JwtResponse;
+import com.springGB.entities.User;
 import com.springGB.exceptions.AppError;
 import com.springGB.services.UserService;
 import com.springGB.utils.JwtTokenUtil;
@@ -15,6 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.beans.Encoder;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,5 +36,24 @@ public class AuthController {
         UserDetails userDetails = userService.loadUserByUsername(authRequest.getUsername());
         String token = jwtTokenUtil.generateToken(userDetails);
         return ResponseEntity.ok(new JwtResponse(token));
+    }
+
+    @PostMapping("/reg")
+    public void createRegToken(@RequestBody JwtRequest authRequest) {
+        User user = userService.findByUsername(authRequest.getUsername()).orElse(null);
+        System.out.println(authRequest.getUsername());
+        System.out.println(authRequest.getPassword());
+        if (user != null) {
+            System.out.println("user un null");
+            return;
+        }
+        user = userService.findByEmail(authRequest.getEmail()).orElse(null);
+        if (user != null) {
+            System.out.println("User em null");
+            return;
+        }
+        userService.saveUser(authRequest.getUsername(), authRequest.getEmail(), authRequest.getPassword());
+
+//        return(authRequest);
     }
 }
